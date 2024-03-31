@@ -61,28 +61,188 @@ Plot the dj0809 using the same plotting function as above.
 
 ```{r}
 # Load DJ index
-load(DJ)
-```
+data(DJ)
 
-```{r}
 # Show head() and tail() of DJ index
 head(DJ)
 tail(DJ)
-```
 
-```{r}
 # Plot DJ index
 plot(DJ)
-```
 
-```{r}
 # Extract 2008-2009 and assign to dj0809
 dj0809 <- DJ["2008/2009"] 
-```
 
-```{r}
 # Plot dj0809
 plot(dj0809)
 ```
 
+### Exploring risk-factor time series: individual equities
+
+For some risk management applications, it is sufficient to model equity risk by looking at indexes. If you want a more detailed model of the risk in a portfolio of equities, you can drill down to the level of individual share prices.
+
+In the previous chapter, you used DJ["2008/2009"] to extract the Dow Jones data from certain rows of an xts object by specifying a date range index. To also extract data from particular columns, you can add a column identifier, like a string name or numeric index, in the brackets following a comma. To select multiple columns, include these column identifiers in a vector. This [rows, columns] format is consistent with indexing most other two dimensional objects in R.
+
+data[index, colname]
+data[index, c(col1index, col2index)]
+The qrmdata package also includes data for certain constituents, or the stocks or companies part of a larger index. The Dow Jones constituents data are contained in "DJ_const". In this exercise, you will view the names of all its stocks, select the Apple and Goldman Sachs share prices, and plot them using the command plot.zoo() to display multiple time series.
+
+### Excercise 2
+
+Load the DJ constituents data "DJ_const" from qrmdata.
+Use names() to view the names in DJ_const and head() to display the first few rows.
+Extract only the Apple ("AAPL") and Goldman Sachs ("GS") share prices for 2008-2009 and assign them to object stocks.
+Plot stocks using plot.zoo().
+
+```{r}
+# Load DJ constituents data
+data("DJ_const")
+
+# Apply names() and head() to DJ_const
+names(DJ_const)
+head(DJ_const)
+
+# Extract AAPL and GS in 2008-09 and assign to stocks
+stocks <- DJ_const["2008/2009",c("AAPL","GS")]
+
+# Plot stocks with plot.zoo()
+plot.zoo(stocks)
+```
+
+### Exploring risk-factor data: exchange rates
+
+For a portfolio with risk exposure in different countries, it is necessary to consider the risk coming from foreign exchange (FX) rates. The qrmdata package includes FX rate data for many currencies, ranging from Swiss Francs to Japanese Yen, with respect to the USD (United States dollar) and GBP (Great Britain pound).
+
+In this exercise, you will look at the datasets "EUR_USD" and "GBP_USD", which contain the Euro and British pound exchange rates against the US dollar. Then, you will merge these time series and plot them together for the period 2010-2015.
+
+### Excercise 3
+
+Load the foreign exchange data "GBP_USD" and "EUR_USD" from qrmdata.
+Use plot() to plot each exchange rate separately.
+Use plot() and the inverse of GBP_USD to plot a US dollar to British pound exchange rate.
+Use merge() to merge the GBP_USD and EUR_USD data, in that order, as object fx.
+Extract the exchange rates for 2010-15 from fx and assign to fx0015.
+Plot fx0015 using plot.zoo().
+
+```{r}
+# Load exchange rate data
+data("GBP_USD")
+data("EUR_USD")
+
+# Plot the two exchange rates
+plot(GBP_USD)
+plot(EUR_USD)
+
+# Plot a USD_GBP exchange rate
+plot(1/GBP_USD)
+
+# Merge the two exchange rates GBP_USD and EUR_USD
+fx <- merge(GBP_USD, EUR_USD, all = TRUE)
+
+# Extract 2010-15 data from fx and assign to fx0015
+fx0015 <-fx["2010/2015"]
+
+# Plot the exchange rates in fx0015
+plot.zoo(fx0015)
+```
+
+## Risk-Factor Returns
+
+### Video 2
+
+1. Risk-factor returns
+00:00 - 00:09
+In QRM, the aim is to model the fluctuations in key risk factors which affect the value of a portfolio.
+
+2. Risk-factor returns
+00:09 - 01:49
+These fluctuations are called the risk-factor changes or risk-factor returns or simply returns. However, there are a few different ways of defining returns. Let (Z_t) be a time series containing the values of a risk factor at a time at a set of regularly-spaced times, which could represent days, weeks, months, etc. For illustration, let's suppose it is a daily series. Here are three different ways of defining risk-factor returns (X_t): In the first definition, the returns are the differences of the risk-factor values, known as simple returns. This is the simplest definition but not the most common. It tends to be used when the risk factors have very small values close to zero (like certain interest-rate series). The second definition is the easiest to interpret. The relative returns are the differences divided by the initial values. If you multiply the relative returns by one hundred, you get percentage changes. So if a stock has a relative return of point zero two, it gains 2% in value; if it has a relative return of minus point zero three, it falls 3% in value. In the third definition, the returns are the differences of the log-values of the risk factors; these are log-returns. This definition is, in fact, the most widely used. Here are a few of the reasons why log-returns are popular.
+
+3. Properties of log-returns
+01:49 - 03:19
+If you build a model for the log-returns of a risk factor, you know that the risk-factor can never become negative. This is generally a desirable feature for risk factors that are prices and rates. However, some risk factors can become negative under unusual market conditions, an example being short-term interest rates. Log returns are, in fact, very close to relative returns for typical values. It can be shown with some algebra that log of Z_t minus log of Z_(t-1) can be approximated by Z_t minus Z_(t-1) divided by Z_(t-1) Finally, there are a couple of theoretical reasons for using log-returns: It is particularly easy to aggregate them to calculate longer-interval returns, such as weekly or monthly returns, as we will see later in this chapter. Also, there is a very famous model for prices known as the Black-Scholes-Merton model, or geometric Brownian motion (GBM). The model is widely used for pricing derivatives. If a price series follows GBM, then the log-returns will be normally distributed. That's all you really need to know about this model at this stage.
+
+4. Log-returns in R
+03:19 - 03:56
+It's worth remarking, however, that you are going to find that log-returns generally aren't normally distributed in practice, at least for short time horizons. To calculate the log-returns of the S&P 500 index, you apply the functions log and diff in succession. Diff calculates differences. Here is some code to illustrate. Note that you get an NA in the first position when you apply these operations. It is best to remove the first value prior to working with the return series.
+
+5. Log-returns in R (2)
+03:56 - 04:26
+Now let's plot the log-returns. You see, a fairly noisy series mostly oscillating between minus point zero five and plus point zero five, which can be approximately interpreted as 5% movements up and down. However, there are some very extreme values. The largest negative return corresponds to the famous stock market crash on Black Monday in 1987.
+
+6. Let's practice!
+04:26 - 04:34
+Now it's your turn to calculate and plot some returns in the next exercises.
+
+### Exploring return series
+
+To analyze risk, the key task is to model the fluctuations in prices and rates over different time periods; these fluctuations are known as returns. To calculate the log-returns of the FTSE stock index and assign to ftse_x, apply the log() and diff() functions in succession:
+
+> ftse_x <- diff(log(FTSE))
+As you saw in the video, differencing in this way will always give a NA in the first position of the time series, which can then be removed with diff(log(FTSE))[-1]. However, you will not need to do this in the course unless it is specified in the instructions.
+
+In this exercise, you will calculate and plot log-return series for the equity and FX risk factors that you have previously encountered. The datasets dj0809, djstocks, and GBP_USD have been pre-loaded into your workspace.
+
+### Excercise 4
+
+Compute the log-returns of the DJ index in dj0809 and assign to object dj0809_x.
+Plot the return series dj0809_x.
+Compute the log-returns of all share prices in djstocks and assign to djstocks_x.
+Plot the share returns djstocks_x. Note that djstocks_x contains multiple time series.
+Compute the log-returns of the GBP_USD exchange rate series and assign to erate_x.
+Plot the return series erate_x.
+
+```{r}
+# Compute the log-returns of dj0809 and assign to dj0809_x
+dj0809_x <- diff(log(dj0809))
+
+# Plot the log-returns
+plot(dj0809_x)
+
+# Compute the log-returns of djstocks and assign to djstocks_x
+djstocks <- stocks
+djstocks_x <- diff(log(djstocks))
+
+# Plot the two share returns
+plot.zoo(djstocks_x)
+
+# Compute the log-returns of GBP_USD and assign to erate_x
+erate_x <- diff(log(GBP_USD))
+
+# Plot the log-returns
+plot(erate_x)
+```
+
+### Different ways of plotting risk-factor and return series
+
+You already know that you can use plot.zoo() to plot multiple time series. For a four-dimensional time series data, the call plot.zoo(data) creates four separate plots by default, unless you include the parameter plot.type = "single" to plot all four series in one plot. You can also add even more parameters such as col to specify different colors and type = "h" to get vertical bars instead of joining points, which can sometimes be a better way of displaying returns.
+
+plot.zoo(x, plot.type, col = 1, type = "l", ...)
+In this exercise, you will explore the plot.zoo() function to plot equity risk-factor data and the corresponding returns in different ways. The multivariate time series djstocks and DJ_const are available in your workspace.
+
+### Excercise 5
+
+Plot djstocks in four separate plots.
+Plot djstocks in one plot in colors 1 to 4. The code to create an appropriate legend for the plot is provided.
+Compute the log-returns of djstocks and assign them to djstocks_x.
+Plot djstocks_x in four separate plots.
+Plot djstocks_x in four separate plots with vertical bars.
+
+```{r}
+# Plot djstocks in four separate plots
+plot.zoo(djstocks)
+
+# Plot djstocks in one plot and add legend
+plot.zoo(djstocks, plot.type = "single", col = 1:4, type = "l")
+legend(julian(x = as.Date("2009-01-01")), y = 70, legend = names(DJ_const)[1:4], fill = 1:4)
+
+# Compute log-returns and assign to djstocks_x
+djstocks_x <- diff(log(djstocks))
+
+# Plot djstocks_x in four separate plots
+plot.zoo(djstocks_x)
+
+# Plot djstocks_x with vertical bars
+plot.zoo(djstocks_x, plot_type = "single", col = 1:4, type = "h")
+```
 
