@@ -1,0 +1,88 @@
+---
+title: "Quantitative Risk Management"
+subtitle: "DataCamp"
+date: "31-03-2024"
+format: html
+editor: visual
+---
+
+## Setup
+
+```{r, warning=FALSE, message=FALSE}
+library(xts)
+library(zoo)
+library(qrmdata)
+library(qrmtools)
+library(tidyverse)
+library(quantmod)
+library(PerformanceAnalytics)
+```
+
+## Exploring Market Risk Factor Data
+
+### Video 1
+
+Hello. My name is Alex McNeil, and I am going to take your through "An Introduction to Quantitative Risk Management".
+
+
+My background is in mathematical statistics, actuarial science, and quantitative finance. Together with my colleagues Ruediger Frey and Paul Embrechts, I am the author of the book "Quantitative Risk Management: Concepts, Techniques, and Tools", published by Princeton University Press. If you want the theoretical background to this course, I recommend you take a look. Together with my co-authors and with Marius Hofert, I have also created the website qrmtutorial(dot)org which provides complementary materials to the QRM book. In particular, there is a lot of R code there, which you might want to try after you've taken this course. Marius and I have two R packages which feature prominently in qrmtutorial. These are qrmdata, which is a large collection of financial datasets for students and researchers in QRM, and qrmtools, which is a set of useful functions. You'll use these packages in the course.
+
+
+In QRM, the goal is to quantify the risk of a portfolio of risky assets. Measuring the risk is the first step towards managing the risk. In the book I wrote, we consider the typical portfolios of risky assets held by banks and insurance companies, and sometimes also their liabilities. But the ideas apply equally to the portfolio of a private investor, like you or me. Managing the risk can entail many things. For example, you might try to reduce the risk by selling assets, by acquiring new assets to increase the diversification of the portfolio, or by using so-called hedging strategies. For the banks and insurers, an important part of managing risk is making sure they have sufficient capital to withstand large losses on their portfolios and remain solvent. For this purpose, they compute measurements of the amounts that they could lose in periods of extreme market stress. A well-known example of one of these risk measures is Value-at-Risk. In this course, you will work up to calculating Value-at-Risk for portfolios. To begin with, it is important to consider where the risk in a portfolio comes from.
+
+
+So think of a portfolio of risky assets. It might contain some stock index trackers, some individual stocks, some government bonds or treasuries, some corporate bonds. It might contain assets denominated in domestic currency and some denominated in foreign currencies. It might contain commodities, like gold. It might contain some derivative securities designed to hedge risk or speculate on price movements, such as equity options. The value of this portfolio at any point in time depends on the fluctuating values of many underlying quantities, which we call risk factors. Examples of risk factors are equity indexes, individual equity prices, foreign exchange rates, interest rates for different borrowing periods (in the case of bonds), and commodity prices. Let's load the QRMdata package and then the dataset SP500. This contains daily values of the well-known equity index based on 500 of the most important US stocks.
+
+
+Using head and tail, the first few lines, and the last few lines of the data can be displayed. Note the dates of the first few values in 1950 and the last few values up to the end of 2015.
+
+
+Let's plot the index. You can see how it has generally gone up over time, but with some drawdowns such as around the 2008-2009 financial crisis.
+
+### Exploring risk-factor time series: equity indexes
+
+In this exercise, you will look at an equity index and plot it for a particular range of dates. The data used in this exercise and in the rest of the course are contained in the package qrmdata. You also need the package xts to manipulate time series.
+
+When the qrmdata library is attached, as it will be throughout the course, you can load a dataset with the data() command. For example, the command data("FTSE") loads the UK FTSE (Financial Times Stock Exchange) index, which you can then refer to as object FTSE.
+
+If you want to extract the data from a certain date range, for example from April 1 to June 30, 2000, you can create a new object using the command ftse00 <- FTSE["2000-04-01/2000-06-30"].
+
+From now onwards, the xts package will also already be loaded into your workspace.
+
+This course touches on a lot of concepts you may have forgotten, so if you ever need a quick refresher, download the xts in R Cheat Sheet and keep it handy!
+
+### Excercise 1
+
+Load the Dow Jones index "DJ" from qrmdata.
+Show the first and last few lines of the DJ index with head() and tail().
+Plot the DJ index using plot().
+Extract the DJ index for the crisis period 2008-2009 and assign to object dj0809.
+Plot the dj0809 using the same plotting function as above.
+
+```{r}
+# Load DJ index
+load(DJ)
+```
+
+```{r}
+# Show head() and tail() of DJ index
+head(DJ)
+tail(DJ)
+```
+
+```{r}
+# Plot DJ index
+plot(DJ)
+```
+
+```{r}
+# Extract 2008-2009 and assign to dj0809
+dj0809 <- DJ["2008/2009"] 
+```
+
+```{r}
+# Plot dj0809
+plot(dj0809)
+```
+
+
